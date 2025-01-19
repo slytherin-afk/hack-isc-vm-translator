@@ -1,0 +1,8 @@
+target/
+.mypy_cache/
+.vscode/
+
+.gitignore.swp
+gitignore
+test.*
+
