@@ -6,11 +6,11 @@ use crate::commands::{Command, CommandType};
 pub struct Parser {
     pub file: String,
     pub file_name: String,
-    nth: usize,
+    pub nth: usize,
 }
 
 impl Parser {
-    pub fn construct(file_path: &Path) -> Result<Self> {
+    pub fn new(file_path: &Path) -> Result<Self> {
         let file = fs::read_to_string(file_path)?;
 
         Ok(Self {
@@ -33,7 +33,7 @@ impl Parser {
 
         while let Some((n, c)) = iterator.next() {
             let c = c.trim();
-            self.nth = n;
+            self.nth = self.nth + n + 1;
 
             if c.starts_with("//") || c.len() <= 0 {
                 continue;
@@ -46,7 +46,7 @@ impl Parser {
     }
 
     pub fn advance<'a>(&'a self) -> Box<dyn Command + 'a> {
-        let command = Self::clean(self.file.lines().nth(self.nth).expect("a command"));
+        let command = Self::clean(self.file.lines().nth(self.nth - 1).expect("a command"));
 
         return CommandType::new(command, &self.file_name).expect("valid command type");
     }

@@ -37,7 +37,7 @@ impl<'a> MemoryAccessCommand<'a> {
 
         let captures = memory_access_command_pattern.captures(command)?;
 
-        let command_type = match &captures[2] {
+        let command_type = match &captures[1] {
             "pop" => Pop,
             "push" => Push,
             _ => unreachable!(),
@@ -51,6 +51,7 @@ impl<'a> MemoryAccessCommand<'a> {
             "static" => Static,
             "pointer" => Pointer,
             "temp" => Temp,
+            "constant" => Constant,
             _ => unreachable!(),
         };
 
