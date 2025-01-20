@@ -132,8 +132,8 @@ impl<'a> MemoryAccessCommand<'a> {
 
     fn handle_temp_push(&self) -> Vec<String> {
         vec![
-            format!("@{0}", &self.i),
-            "D=A".to_string(),
+            format!("@{0}", &self.i + 5),
+            "D=M".to_string(),
             "@SP".to_string(),
             "M=M+1".to_string(),
             "A=M-1".to_string(),
