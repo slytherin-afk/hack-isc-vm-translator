@@ -7,6 +7,7 @@ enum MemorySegment {
     Pointer,
     Temp,
     Static,
+    Constant,
 }
 
 enum MemoryCommandType {
@@ -29,9 +30,10 @@ pub struct MemoryAccessCommand<'a> {
 
 impl<'a> MemoryAccessCommand<'a> {
     pub fn new(command: &'a str, file_name: &'a str) -> Option<Self> {
-        let memory_access_command_pattern =
-            Regex::new(r"^(push|pop)\s+(argument|local|this|that|static|pointer|temp)\s+(\d+)$")
-                .ok()?;
+        let memory_access_command_pattern = Regex::new(
+            r"^(push|pop)\s+(argument|local|this|that|static|pointer|temp|constant)\s+(\d+)$",
+        )
+        .ok()?;
 
         let captures = memory_access_command_pattern.captures(command)?;
 
@@ -68,7 +70,9 @@ impl<'a> MemoryAccessCommand<'a> {
             i,
         })
     }
+}
 
+impl<'a> MemoryAccessCommand<'a> {
     fn handle_segment_push(&self) -> Vec<String> {
         let segment = match self.segment {
             Lcl => "LCL",
@@ -142,13 +146,90 @@ impl<'a> MemoryAccessCommand<'a> {
     }
 }
 
+impl<'a> MemoryAccessCommand<'a> {
+    fn handle_segment_pop(&self) -> Vec<String> {
+        let segment = match self.segment {
+            Lcl => "LCL",
+            Arg => "ARG",
+            This => "THIS",
+            That => "THAT",
+            _ => unreachable!(),
+        };
+
+        vec![
+            format!("@{0}", self.i),
+            "D=A".to_string(),
+            format!("@{segment}"),
+            "D=D+M".to_string(),
+            "@R13".to_string(),
+            "M=D".to_string(),
+            "@SP".to_string(),
+            "AM=M-1".to_string(),
+            "D=M".to_string(),
+            "@R13".to_string(),
+            "A=M".to_string(),
+            "M=D".to_string(),
+        ]
+    }
+
+    fn handle_constant_pop(&self) -> Vec<String> {
+        vec!["@SP".to_string(), "AM=M-1".to_string()]
+    }
+
+    fn handle_pointer_pop(&self) -> Vec<String> {
+        let segment = match self.i {
+            0 => "THIS",
+            1 => "THAT",
+            _ => unreachable!(),
+        };
+
+        vec![
+            "@SP".to_string(),
+            "AM=M-1".to_string(),
+            "D=M".to_string(),
+            format!("@{segment}"),
+            "M=D".to_string(),
+        ]
+    }
+
+    fn handle_static_pop(&self) -> Vec<String> {
+        vec![
+            "@SP".to_string(),
+            "AM=M-1".to_string(),
+            "D=M".to_string(),
+            format!("@{0}.{1}", self.file_name, self.i),
+            "M=D".to_string(),
+        ]
+    }
+
+    fn handle_temp_pop(&self) -> Vec<String> {
+        vec![
+            "@SP".to_string(),
+            "AM=M-1".to_string(),
+            "D=M".to_string(),
+            format!("@{0}", &self.i + 5),
+            "M=D".to_string(),
+        ]
+    }
+}
+
 impl<'a> Command for MemoryAccessCommand<'a> {
     fn generate(&self) -> Vec<String> {
-        match self.segment {
-            Lcl | Arg | This | That => self.handle_segment_push(),
-            Pointer => self.handle_pointer_push(),
-            Temp => self.handle_temp_push(),
-            Static => self.handle_static_push(),
+        match self.command_type {
+            Push => match self.segment {
+                Lcl | Arg | This | That => self.handle_segment_push(),
+                Pointer => self.handle_pointer_push(),
+                Temp => self.handle_temp_push(),
+                Static => self.handle_static_push(),
+                Constant => self.handle_constant_push(),
+            },
+            Pop => match self.segment {
+                Lcl | Arg | This | That => self.handle_segment_pop(),
+                Pointer => self.handle_pointer_pop(),
+                Temp => self.handle_temp_pop(),
+                Static => self.handle_static_pop(),
+                Constant => self.handle_constant_pop(),
+            },
         }
     }
 }
