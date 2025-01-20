@@ -60,7 +60,7 @@ impl<'a> ArithmeticCommand<'a> {
             "@R13".to_string(),
             main_isc.to_string(),
             "@SP".to_string(),
-            "A=M".to_string(),
+            "A=M-1".to_string(),
             "M=D".to_string(),
         ]
     }
