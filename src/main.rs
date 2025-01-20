@@ -13,8 +13,4 @@ fn main() {
         let command = parser.advance();
         code.extend(command.generate());
     }
-
-    for i in code {
-        println!("{i}");
-    }
 }
