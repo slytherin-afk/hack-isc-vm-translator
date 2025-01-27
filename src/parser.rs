@@ -7,6 +7,8 @@ pub struct Parser {
     pub file: String,
     pub file_name: String,
     pub nth: usize,
+    pub function_name: Option<String>,
+    pub ret: u16,
 }
 
 impl Parser {
@@ -20,6 +22,8 @@ impl Parser {
                 .unwrap()
                 .to_string_lossy()
                 .into_owned(),
+            function_name: None,
+            ret: 0,
             nth: 0,
         })
     }
@@ -30,14 +34,17 @@ impl Parser {
 
     pub fn has_more_command(&mut self) -> bool {
         let mut iterator = self.file.lines().skip(self.nth).enumerate();
+        let mut counter = self.nth;
 
         while let Some((n, c)) = iterator.next() {
             let c = c.trim();
-            self.nth = self.nth + n + 1;
+            counter = n + 1;
 
             if c.starts_with("//") || c.len() <= 0 {
                 continue;
             }
+
+            self.nth = self.nth + counter;
 
             return true;
         }
@@ -46,8 +53,21 @@ impl Parser {
     }
 
     pub fn advance<'a>(&'a self) -> Box<dyn Command + 'a> {
-        let command = Self::clean(self.file.lines().nth(self.nth - 1).expect("a command"));
+        let command: &str = Self::clean(
+            self.file
+                .lines()
+                .nth(self.nth - 1)
+                .expect(&format!("a command {0}", self.nth)),
+        );
 
-        return CommandType::new(command, &self.file_name).expect("valid command type");
+        return CommandType::new(
+            command,
+            &self.file_name,
+            match &self.function_name {
+                Some(name) => Some(name),
+                None => None,
+            },
+        )
+        .expect(&format!("valid command type {}", command));
     }
 }
