@@ -38,7 +38,9 @@ impl<'a> ArithmeticCommand<'a> {
             command,
         });
     }
+}
 
+impl<'a> ArithmeticCommand<'a> {
     fn generate_2_operand_arithmetic_code(&self) -> Vec<String> {
         let main_isc = match self.command_type {
             Add => "D=D+M",
