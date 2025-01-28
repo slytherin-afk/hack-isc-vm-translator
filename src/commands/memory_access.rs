@@ -24,7 +24,7 @@ pub struct MemoryAccessCommand<'a> {
     file_name: &'a str,
     command_type: MemoryCommandType,
     segment: MemorySegment,
-    command: &'a str,
+    _command: &'a str,
     i: i16,
 }
 
@@ -67,7 +67,7 @@ impl<'a> MemoryAccessCommand<'a> {
             file_name,
             command_type,
             segment,
-            command,
+            _command: command,
             i,
         })
     }

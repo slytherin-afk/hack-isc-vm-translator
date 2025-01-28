@@ -1,3 +1,5 @@
+use rand::{distributions::Alphanumeric, Rng};
+
 enum ArithmeticType {
     Add,
     Sub,
@@ -15,7 +17,7 @@ use ArithmeticType::*;
 
 pub struct ArithmeticCommand<'a> {
     command_type: ArithmeticType,
-    command: &'a str,
+    _command: &'a str,
 }
 
 impl<'a> ArithmeticCommand<'a> {
@@ -35,10 +37,12 @@ impl<'a> ArithmeticCommand<'a> {
 
         return Some(Self {
             command_type,
-            command,
+            _command: command,
         });
     }
+}
 
+impl<'a> ArithmeticCommand<'a> {
     fn generate_2_operand_arithmetic_code(&self) -> Vec<String> {
         let main_isc = match self.command_type {
             Add => "D=D+M",
@@ -81,6 +85,20 @@ impl<'a> ArithmeticCommand<'a> {
             _ => unreachable!(),
         };
 
+        let label: String = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .filter(|c| c.is_ascii_alphabetic()) // Keep only alphabetic characters
+            .take(10) // Take 10 characters
+            .map(char::from)
+            .collect();
+
+        let end_label: String = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .filter(|c| c.is_ascii_alphabetic()) // Keep only alphabetic characters
+            .take(10) // Take 10 characters
+            .map(char::from)
+            .collect();
+
         vec![
             "@SP".to_string(),
             "AM=M-1".to_string(),
@@ -89,18 +107,18 @@ impl<'a> ArithmeticCommand<'a> {
             "A=M-1".to_string(),
             "A=M".to_string(),
             "D=A-D".to_string(),
-            "@MINUS_ONE".to_string(),
+            format!("@{label}"),
             main_isc.to_string(),
             "@SP".to_string(),
             "A=M-1".to_string(),
             "M=0".to_string(),
-            "@END".to_string(),
+            format!("@{end_label}"),
             "0;JMP".to_string(),
-            "(MINUS_ONE)".to_string(),
+            format!("({label})"),
             "@SP".to_string(),
             "A=M-1".to_string(),
             "M=-1".to_string(),
-            "(END)".to_string(),
+            format!("({end_label})"),
         ]
     }
 }
