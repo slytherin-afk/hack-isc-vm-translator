@@ -52,32 +52,21 @@ impl<'a> BranchingCommand<'a> {
             "@SP".to_string(),
             "AM=M-1".to_string(),
             "D=M".to_string(),
-            format!(
-                "@{0}.{1}${2}",
-                self.file_name,
-                self.function_name.unwrap_or(""),
-                self.label
-            ),
+            format!("@{0}${1}", self.function_name.unwrap_or(""), self.label),
             "D;JNE".to_string(),
         ]
     }
 
     fn generate_goto(&self) -> Vec<String> {
         vec![
-            format!(
-                "@{0}.{1}${2}",
-                self.file_name,
-                self.function_name.unwrap_or(""),
-                self.label
-            ),
+            format!("@{0}${1}", self.function_name.unwrap_or(""), self.label),
             "0;JMP".to_string(),
         ]
     }
 
     fn generate_label(&self) -> Vec<String> {
         vec![format!(
-            "({0}.{1}${2})",
-            self.file_name,
+            "({0}${1})",
             self.function_name.unwrap_or(""),
             self.label
         )]

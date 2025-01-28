@@ -10,7 +10,16 @@ fn main() {
     let mut code = vec![];
 
     while parser.has_more_command() {
-        let command = parser.advance();
-        code.extend(command.generate());
+        let (c, command) = parser.advance();
+
+        let results = command.generate();
+
+        println!("// {0}", c);
+
+        for i in &results {
+            println!("{i}");
+        }
+
+        code.extend(results);
     }
 }

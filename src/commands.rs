@@ -1,9 +1,11 @@
 pub mod arithmetic;
 pub mod branching;
+pub mod functional;
 pub mod memory_access;
 
 use arithmetic::ArithmeticCommand;
 use branching::BranchingCommand;
+use functional::FunctionalCommand;
 use memory_access::MemoryAccessCommand;
 
 pub trait Command {
@@ -17,6 +19,7 @@ impl CommandType {
         command: &'a str,
         file_name: &'a str,
         function_name: Option<&'a str>,
+        ret: u16,
     ) -> Option<Box<dyn Command + 'a>> {
         let assume_arithmetic: Option<ArithmeticCommand<'_>> = ArithmeticCommand::new(command);
 
@@ -33,6 +36,12 @@ impl CommandType {
         let assume_branching = BranchingCommand::new(command, file_name, function_name);
 
         if let Some(command) = assume_branching {
+            return Some(Box::new(command));
+        }
+
+        let assume_functional = FunctionalCommand::new(command, file_name, function_name, ret);
+
+        if let Some(command) = assume_functional {
             return Some(Box::new(command));
         }
 
