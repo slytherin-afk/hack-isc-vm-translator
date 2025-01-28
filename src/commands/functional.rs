@@ -9,7 +9,7 @@ enum FunctionalCommandType {
 }
 
 pub struct FunctionalCommand<'a> {
-    file_name: &'a str,
+    _file_name: &'a str,
     function_name: &'a str,
     calling_function: Option<&'a str>,
     ret: u16,
@@ -52,7 +52,7 @@ impl<'a> FunctionalCommand<'a> {
                         arg,
                         calling_function,
                         command_type,
-                        file_name,
+                        _file_name: file_name,
                         function_name: function_name?,
                         ret,
                     });
@@ -145,10 +145,7 @@ impl<'a> FunctionalCommand<'a> {
     }
 
     fn generate_call_command(&self) -> Vec<String> {
-        let return_label = format!(
-            "{0}$ret.{1}",
-            self.function_name, self.ret
-        );
+        let return_label = format!("{0}$ret.{1}", self.function_name, self.ret);
         let narg = 5 + self.arg;
         let calling_function = format!("@{0}", self.calling_function.expect("a calling function"));
 

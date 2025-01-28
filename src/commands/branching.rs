@@ -10,7 +10,7 @@ enum BranchingCommandType {
 
 pub struct BranchingCommand<'a> {
     label: String,
-    file_name: &'a str,
+    _file_name: &'a str,
     function_name: Option<&'a str>,
     command_type: BranchingCommandType,
 }
@@ -33,7 +33,7 @@ impl<'a> BranchingCommand<'a> {
                     if let Some(label) = captures.get(1) {
                         return Some(Self {
                             label: label.as_str().to_string(),
-                            file_name,
+                            _file_name: file_name,
                             function_name,
                             command_type,
                         });
